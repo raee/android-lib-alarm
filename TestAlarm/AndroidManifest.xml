@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.rae.test.alarm"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="cn.rae.test.alarm" >
+    </instrumentation>
+
+    <application
+        android:name="cn.rae.test.alarm.TestApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="cn.rae.test.alarm.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <uses-library android:name="android.test.runner" />
+        <!-- 闹钟广播 -->
+        <receiver android:name="com.rae.core.alarm.AlarmBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="com.rae.core.alarm.action.wakeup" />
+            </intent-filter>
+        </receiver>
+        <!-- 闹钟服务 -->
+        <service android:name="com.rae.core.alarm.AlarmService" >
+        </service>
+    </application>
+
+</manifest>
