@@ -15,25 +15,25 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class AlarmDataBase extends SQLiteOpenHelper {
-
-	private static final String TAG = "AlarmDataBase";
-	private String table = "alarms";
-
+public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
+	
+	private static final String	TAG		= "AlarmDataBase";
+	private String				table	= "alarms";
+	
 	public AlarmDataBase(Context context) {
 		super(context, "alarm.db", null, 1);
 	}
-
+	
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("create table alarms(id INTEGER NOT NULL,title nvarchar(255)not null default'闹钟',content text,time nvarchar(255)not null,nexttime nvarchar(255),cycle nvarchar(255)not null,ring nvarchar(255)not null,images nvarchar(255),sound nvarchar(255),state int not null default 0,timespan int default 0,otherparam nvarchar(255),weeks nvarchar(255),primary key(id));");
 	}
-
+	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+		
 	}
-
+	
 	private ContentValues getAlarmContentValues(AlarmEntity entity) {
 		ContentValues values = new ContentValues();
 		values.put("title", entity.getTitle());
@@ -47,14 +47,14 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		values.put("state", entity.getState());
 		values.put("timespan", entity.getTimeSpan());
 		values.put("otherparam", entity.getOtherParam());
-
+		
 		int[] weeks = entity.getWeeks();
 		if (null != weeks && weeks.length > 0) {
 			values.put("weeks", Arrays.toString(weeks));
 		}
 		return values;
 	}
-
+	
 	/**
 	 * @param entity
 	 * @return 增加后的主键
@@ -64,8 +64,9 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		if (exits(entity)) {
 			update(entity);
 			return entity.getId();
-		} else {
-
+		}
+		else {
+			
 			SQLiteDatabase db = getWritableDatabase();
 			int result = (int) db.insert(table, null, getAlarmContentValues(entity));
 			if (result < 0) {
@@ -75,14 +76,12 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 			return result;
 		}
 	}
-
+	
 	public boolean exits(AlarmEntity entity) {
-		if (entity == null) {
-			return false;
-		}
+		if (entity == null) { return false; }
 		return getAlarm(entity.getId()) != null;
 	}
-
+	
 	/**
 	 * 删除
 	 * 
@@ -98,7 +97,7 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		db.close();
 		return result > 0;
 	}
-
+	
 	/**
 	 * 更新
 	 * 
@@ -114,7 +113,7 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		db.close();
 		return result > 0;
 	}
-
+	
 	public List<AlarmEntity> getAlarms() {
 		List<AlarmEntity> result = new ArrayList<AlarmEntity>();
 		SQLiteDatabase db = getReadableDatabase();
@@ -127,7 +126,7 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		db.close();
 		return result;
 	}
-
+	
 	public AlarmEntity getAlarm(int id) {
 		AlarmEntity entity = null;
 		SQLiteDatabase db = getReadableDatabase();
@@ -135,12 +134,12 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		if (cursor.moveToNext()) {
 			entity = read(cursor);
 		}
-
+		
 		cursor.close();
 		db.close();
 		return entity;
 	}
-
+	
 	private AlarmEntity read(Cursor cursor) {
 		int id = cursor.getInt(cursor.getColumnIndex("id"));
 		String title = cursor.getString(cursor.getColumnIndex("title"));
@@ -155,7 +154,7 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		int timespan = cursor.getInt(cursor.getColumnIndex("timespan"));
 		String otherParam = cursor.getString(cursor.getColumnIndex("otherparam"));
 		String weeks = cursor.getString(cursor.getColumnIndex("weeks"));
-
+		
 		AlarmEntity entity = new AlarmEntity(cycle, title, time);
 		entity.setId(id);
 		entity.setContent(content);
@@ -166,7 +165,7 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 		entity.setState(state);
 		entity.setTimeSpan(timespan);
 		entity.setOtherParam(otherParam);
-
+		
 		// 数组转换
 		if (!TextUtils.isEmpty(weeks)) {
 			try {
@@ -176,11 +175,12 @@ public class AlarmDataBase extends SQLiteOpenHelper {
 					arrWeeks[i] = arr.getInt(i);
 				}
 				entity.setWeeks(arrWeeks);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e) {
 				e.printStackTrace();
 			}
 		}
-
+		
 		return entity;
 	}
 }
