@@ -22,12 +22,10 @@ public class EveryOneTimeRepeatProvider extends AlarmProvider {
 	}
 
 	@Override
-	public void create() {
+	public AlarmEntity create() {
 		long triggerAtMillis;
-		String time = mAlarmEntity.getTime();
 		if (TextUtils.isEmpty(mAlarmEntity.getNextTime())) { // 第一次创建
-			triggerAtMillis = converTime(System.currentTimeMillis(), time);
-			Log.i(TAG, "闹钟为第一次创建！");
+			triggerAtMillis = oneCreate();
 		} else {
 			triggerAtMillis = AlarmUtils.getTimeInMillis(mAlarmEntity.getNextTime());
 			Log.i(TAG, "取下次响铃时间！");
@@ -38,11 +36,23 @@ public class EveryOneTimeRepeatProvider extends AlarmProvider {
 		}
 
 		setRepeat(triggerAtMillis, getTimeSpan());
+		return this.mAlarmEntity;
 	}
+
 
 	private int getTimeSpan() {
 		return mAlarmEntity.getTimeSpan();
 	}
+	
+	/**
+	 * 第一次创建时别调用
+	 */
+	protected long oneCreate() {
+		Log.i(TAG, "闹钟为第一次创建！");
+		return converTime(System.currentTimeMillis(), mAlarmEntity.getTime());
+	}
+	
+	
 
 	@Override
 	public void update() {

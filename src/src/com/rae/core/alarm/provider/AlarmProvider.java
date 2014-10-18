@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.rae.core.alarm.AlarmDataBase;
 import com.rae.core.alarm.AlarmEntity;
@@ -60,7 +61,7 @@ public abstract class AlarmProvider {
 	/**
 	 * 创建闹钟，由于不同类型的闹钟创建都各部相同，所以抽象。
 	 */
-	public abstract void create();
+	public abstract AlarmEntity create();
 	
 	/**
 	 * 在数据库中创建一个闹钟，如果存在则更新，不存在则创建。
@@ -302,7 +303,14 @@ public abstract class AlarmProvider {
 	 *            是否重复
 	 */
 	protected void onAlarmSet(AlarmEntity entity, String date, boolean isRepeat) {
+		Toast.makeText(mContext, "闹钟距离现在还有："+getNextAlarmTimeSpan(), Toast.LENGTH_LONG).show();
 		Log.i(TAG, "---- 设置闹钟：" + entity.getTitle() + date + "----------");
 	}
 	
+	/**
+	 * 获取下次响铃日期距离现在还有多久，单位：秒。
+	 */
+	public String getNextAlarmTimeSpan(){
+		return AlarmUtils.getNextTimeSpanString(mAlarmEntity.getNextTime());
+	}
 }

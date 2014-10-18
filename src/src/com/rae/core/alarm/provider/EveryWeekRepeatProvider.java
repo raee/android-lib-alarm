@@ -26,13 +26,14 @@ public class EveryWeekRepeatProvider extends AlarmProvider {
 	}
 
 	@Override
-	public void create() {
+	public AlarmEntity create() {
 		if (null == mWeeks || mWeeks.length <= 0) {
 			onAlarmError(new AlarmException("必须至少设置一个周重复。"));
-			return;
+			return this.mAlarmEntity;
 		}
 		long triggerAtMillis = getNextAlarmTime(converTime(System.currentTimeMillis(), mAlarmEntity.getTime()));
 		set(triggerAtMillis);
+		return this.mAlarmEntity;
 	}
 
 	@Override

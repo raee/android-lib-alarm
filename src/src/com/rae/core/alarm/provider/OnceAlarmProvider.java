@@ -17,8 +17,9 @@ public class OnceAlarmProvider extends AlarmProvider {
 	}
 
 	@Override
-	public void create() {
+	public AlarmEntity create() {
 		set(mAlarmEntity.getTime());
+		return this.mAlarmEntity;
 	}
 
 	@Override

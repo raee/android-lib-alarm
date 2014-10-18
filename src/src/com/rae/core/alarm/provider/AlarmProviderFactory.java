@@ -38,6 +38,9 @@ public final class AlarmProviderFactory {
 		else if (AlarmEntity.TYPE_REPEAT_EVERY_WEEK.equals(type)) {// 每周几重复闹钟
 			provider = new EveryWeekRepeatProvider(context, entity);
 		}
+		else if (AlarmEntity.TYPE_REPEAT_EVERY_MONTH.equals(type)) {
+			provider = new EveryMonthRepeatProvider(context, entity);
+		}
 		else {// 单次闹钟
 			provider = new OnceAlarmProvider(context, entity);
 		}
@@ -87,15 +90,26 @@ public final class AlarmProviderFactory {
 		System.gc();
 	}
 	
-//	public static AlarmEntity getAlarmEntityById(Context context, int id) {
-//		if (id == 0) { return null; }
-//		AlarmDataBase db = new AlarmDataBase(context);
-//		AlarmEntity result = db.getAlarm(id);
-//		db.close();
-//		return result;
-//	}
+	//	public static AlarmEntity getAlarmEntityById(Context context, int id) {
+	//		if (id == 0) { return null; }
+	//		AlarmDataBase db = new AlarmDataBase(context);
+	//		AlarmEntity result = db.getAlarm(id);
+	//		db.close();
+	//		return result;
+	//	}
 	
-	public static IDbAlarm getDbAlarm(Context context){
+	public static IDbAlarm getDbAlarm(Context context) {
 		return new AlarmDataBase(context);
+	}
+	
+	/**
+	 * 创建闹钟
+	 * 
+	 * @param context
+	 * @param entity
+	 *            闹钟实体
+	 */
+	public static void create(Context context, AlarmEntity entity) {
+		getProvider(context, entity).create();
 	}
 }
