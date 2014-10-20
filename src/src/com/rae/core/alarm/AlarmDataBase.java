@@ -59,6 +59,7 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 	 * @param entity
 	 * @return 增加后的主键
 	 */
+	@Override
 	public int addOrUpdate(AlarmEntity entity) {
 		// 主键形式。
 		if (exits(entity)) {
@@ -88,6 +89,7 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 	 * @param entity
 	 * @return
 	 */
+	@Override
 	public boolean delete(AlarmEntity entity) {
 		SQLiteDatabase db = getWritableDatabase();
 		int result = db.delete(table, "id=?", new String[] { String.valueOf(entity.getId()) });
@@ -104,6 +106,7 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 	 * @param entity
 	 * @return
 	 */
+	@Override
 	public boolean update(AlarmEntity entity) {
 		SQLiteDatabase db = getWritableDatabase();
 		int result = db.update(table, getAlarmContentValues(entity), "id=?", new String[] { String.valueOf(entity.getId()) });
@@ -114,6 +117,7 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 		return result > 0;
 	}
 	
+	@Override
 	public List<AlarmEntity> getAlarms() {
 		List<AlarmEntity> result = new ArrayList<AlarmEntity>();
 		SQLiteDatabase db = getReadableDatabase();
@@ -127,6 +131,7 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 		return result;
 	}
 	
+	@Override
 	public AlarmEntity getAlarm(int id) {
 		AlarmEntity entity = null;
 		SQLiteDatabase db = getReadableDatabase();

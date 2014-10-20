@@ -2,9 +2,6 @@ package com.rae.core.alarm.provider;
 
 import java.util.Calendar;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -104,6 +101,11 @@ public abstract class AlarmProvider {
 		Log.w(TAG, "---> 闹钟被取消  <-----\n" + mAlarmEntity.toString());
 	}
 	
+	public void delete() {
+		cancle();
+		getDatabase().delete(mAlarmEntity);
+	}
+	
 	/**
 	 * 设置闹钟实体
 	 * 
@@ -129,50 +131,6 @@ public abstract class AlarmProvider {
 	 */
 	public String getName() {
 		return mName;
-	}
-	
-	/**
-	 * 添加闹钟参数
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	public void putValue(String name, Object value) {
-		try {
-			String json = mAlarmEntity.getOtherParam();
-			JSONObject jsonObj;
-			if (TextUtils.isEmpty(json)) {
-				jsonObj = new JSONObject();
-			}
-			else {
-				jsonObj = new JSONObject(json);
-			}
-			jsonObj.put(name, value.toString());
-			mAlarmEntity.setOtherParam(jsonObj.toString());
-		}
-		catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * 获取闹钟参数
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public String getValue(String name) {
-		String json = mAlarmEntity.getOtherParam();
-		if (!TextUtils.isEmpty(json)) {
-			try {
-				JSONObject obj = new JSONObject(json);
-				return obj.getString(name);
-			}
-			catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-		return "";
 	}
 	
 	/**
@@ -217,8 +175,8 @@ public abstract class AlarmProvider {
 	protected boolean set(long triggerAtMillis) {
 		String date = AlarmUtils.getDateByTimeInMillis(triggerAtMillis);
 		triggerAtMillis = checkOutOfTime(triggerAtMillis); // 检查时间是否过期
-		if (triggerAtMillis <= 0 || triggerAtMillis == AlarmUtils.getTimeInMillis(mAlarmEntity.getTime())) {
-			onAlarmError(new AlarmException("下次响铃时间不能为0或者是上次时间！错误时间：" + triggerAtMillis));
+		if (triggerAtMillis <= 0 || triggerAtMillis < AlarmUtils.getTimeInMillis(mAlarmEntity.getTime())) {
+			onAlarmError(new AlarmException("下次响铃时间不能为0或者小于上次时间！错误时间：" + date));
 			return false;
 		}
 		createInDatabase();
@@ -303,14 +261,14 @@ public abstract class AlarmProvider {
 	 *            是否重复
 	 */
 	protected void onAlarmSet(AlarmEntity entity, String date, boolean isRepeat) {
-		Toast.makeText(mContext, "闹钟距离现在还有："+getNextAlarmTimeSpan(), Toast.LENGTH_LONG).show();
+		Toast.makeText(mContext, "闹钟距离现在还有：" + getNextAlarmTimeSpan(), Toast.LENGTH_LONG).show();
 		Log.i(TAG, "---- 设置闹钟：" + entity.getTitle() + date + "----------");
 	}
 	
 	/**
 	 * 获取下次响铃日期距离现在还有多久，单位：秒。
 	 */
-	public String getNextAlarmTimeSpan(){
+	public String getNextAlarmTimeSpan() {
 		return AlarmUtils.getNextTimeSpanString(mAlarmEntity.getNextTime());
 	}
 }

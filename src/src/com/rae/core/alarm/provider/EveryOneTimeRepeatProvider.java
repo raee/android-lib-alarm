@@ -80,6 +80,7 @@ public class EveryOneTimeRepeatProvider extends AlarmProvider {
 	 *            当前时间，格式：08:00
 	 * @return
 	 */
+	@Override
 	public long getNextAlarmTime(long currentTimeAtMillis) {
 		long current = System.currentTimeMillis();
 		if (currentTimeAtMillis > current) {

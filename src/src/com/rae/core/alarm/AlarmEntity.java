@@ -1,5 +1,8 @@
 package com.rae.core.alarm;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.media.RingtoneManager;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -87,7 +90,7 @@ public class AlarmEntity implements Parcelable {
 	private int							state;														// 闹钟状态：正常、关闭、删除
 	private String						otherParam;												// 其他参数，key,value 的形式。
 	private int							timeSpan;													// 间隔，如：1天1次、3天1次。单位为：毫秒。
-	private int[]						weeks;														// 重复周期。设置周期设置为：周几重复才生效。
+	private int[]						weeks						= new int[1];					// 重复周期。设置周期设置为：周几重复才生效。
 																									
 	public AlarmEntity(String cycle, String title, String time) {
 		setCycle(cycle);
@@ -279,6 +282,53 @@ public class AlarmEntity implements Parcelable {
 	
 	public void setWeeks(int[] weeks) {
 		this.weeks = weeks;
+	}
+	
+	/**
+	 * 添加闹钟参数
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	public void putValue(String name, Object value) {
+		try {
+			String json = getOtherParam();
+			JSONObject jsonObj;
+			if (TextUtils.isEmpty(json)) {
+				jsonObj = new JSONObject();
+			}
+			else {
+				jsonObj = new JSONObject(json);
+			}
+			if (!TextUtils.isEmpty(jsonObj.optString(name, null))) { //存在的情况
+				jsonObj.remove(name); //先移除，后添加。
+			}
+			jsonObj.put(name, value.toString());
+			setOtherParam(jsonObj.toString());
+		}
+		catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 获取闹钟参数
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public String getValue(String name) {
+		String json = getOtherParam();
+		if (!TextUtils.isEmpty(json)) {
+			try {
+				JSONObject obj = new JSONObject(json);
+				return obj.optString(name, "");
+			}
+			catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		return "";
 	}
 	
 }
