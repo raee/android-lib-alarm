@@ -14,6 +14,6 @@ public class EveryDayRepeatAlarmProvider extends EveryOneTimeRepeatProvider {
 
 	public EveryDayRepeatAlarmProvider(Context context, AlarmEntity entity) {
 		super(context, entity);
-		entity.setTimeSpan(24 * 60 * 60 * 1000);
+		entity.setTimeSpan(AlarmEntity.TIME_OF_ONE_DAY);
 	}
 }

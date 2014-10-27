@@ -2,6 +2,7 @@ package com.rae.core.alarm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -119,6 +120,9 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 	
 	@Override
 	public List<AlarmEntity> getAlarms() {
+		
+		// 更据响铃时间排序
+		
 		List<AlarmEntity> result = new ArrayList<AlarmEntity>();
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor cursor = db.rawQuery("select * from alarms", null);
@@ -128,6 +132,8 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 		}
 		cursor.close();
 		db.close();
+		
+		Collections.sort(result, new AlarmEntityComparator());
 		return result;
 	}
 	
@@ -139,7 +145,6 @@ public class AlarmDataBase extends SQLiteOpenHelper implements IDbAlarm {
 		if (cursor.moveToNext()) {
 			entity = read(cursor);
 		}
-		
 		cursor.close();
 		db.close();
 		return entity;

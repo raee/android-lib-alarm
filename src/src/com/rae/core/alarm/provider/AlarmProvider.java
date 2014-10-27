@@ -3,13 +3,15 @@ package com.rae.core.alarm.provider;
 import java.util.Calendar;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.rae.core.alarm.AlarmCallbackListener;
 import com.rae.core.alarm.AlarmDataBase;
 import com.rae.core.alarm.AlarmEntity;
 import com.rae.core.alarm.AlarmException;
@@ -41,6 +43,7 @@ public abstract class AlarmProvider {
 	private AlarmManager			mAlarmManager;												// 系统闹钟管理对象
 	private IDbAlarm				mDb;
 	protected Calendar				calendar			= Calendar.getInstance();
+	private AlarmCallbackListener	mListener;
 	
 	public AlarmProvider(Context context, AlarmEntity entity) {
 		mContext = context;
@@ -53,6 +56,15 @@ public abstract class AlarmProvider {
 			mDb = new AlarmDataBase(mContext);
 		}
 		return mDb;
+	}
+	
+	/**
+	 * 设置闹钟监听
+	 * 
+	 * @param listener
+	 */
+	public void setAlarmListener(AlarmCallbackListener listener) {
+		this.mListener = listener;
 	}
 	
 	/**
@@ -158,9 +170,10 @@ public abstract class AlarmProvider {
 	protected long checkOutOfTime(long triggerAtMillis) {
 		
 		if (triggerAtMillis < System.currentTimeMillis()) {
-			Log.e(TAG, "设定的响铃时间已经过期！" + AlarmUtils.getDateByTimeInMillis(triggerAtMillis));
+			String errorTime = AlarmUtils.getDateByTimeInMillis(triggerAtMillis);
 			triggerAtMillis = getNextAlarmTime(triggerAtMillis); // 获取下次闹铃日期
-			Log.i(TAG, "过期时间更改为：" + AlarmUtils.getDateByTimeInMillis(triggerAtMillis));
+			String newTime = AlarmUtils.getDateByTimeInMillis(triggerAtMillis);
+			onAlarmError(new AlarmException("设定的响铃时间（" + errorTime + "）已经过期，时间更改为：" + newTime));
 		}
 		
 		return triggerAtMillis;
@@ -247,7 +260,27 @@ public abstract class AlarmProvider {
 	 *            异常信息
 	 */
 	protected void onAlarmError(AlarmException e) {
-		Log.e(TAG, e.getMessage());
+		if (mListener != null) {
+			mListener.onAlarmError(e);
+		}
+	}
+	
+	protected void onAlarmCancle() {
+		if (mListener != null) {
+			mListener.onAlarmCancle(this, mAlarmEntity);
+		}
+	}
+	
+	protected void onAlarmUpdate(String lastTime, String nextTime) {
+		if (mListener != null) {
+			mListener.onAlarmUpdate(this, mAlarmEntity, lastTime, nextTime);
+		}
+	}
+	
+	protected void onAlarmDelete() {
+		if (mListener != null) {
+			mListener.onAlarmDelete(this, mAlarmEntity);
+		}
 	}
 	
 	/**
@@ -260,9 +293,23 @@ public abstract class AlarmProvider {
 	 * @param isRepeat
 	 *            是否重复
 	 */
+	@SuppressWarnings("deprecation")
 	protected void onAlarmSet(AlarmEntity entity, String date, boolean isRepeat) {
-		Toast.makeText(mContext, "闹钟距离现在还有：" + getNextAlarmTimeSpan(), Toast.LENGTH_LONG).show();
+		String timeTips = getNextAlarmTimeSpan();
 		Log.i(TAG, "---- 设置闹钟：" + entity.getTitle() + date + "----------");
+		if (mListener != null) {
+			mListener.onAlarmCreated(this, mAlarmEntity, timeTips);
+		}
+		
+		// 通知。
+		Notification notification = new Notification();
+		notification.flags = Notification.FLAG_AUTO_CANCEL;
+		notification.tickerText = entity.getTitle() + "，响铃时间：" + timeTips;
+		notification.when = System.currentTimeMillis();
+		notification.icon = mContext.getApplicationInfo().icon;
+		notification.setLatestEventInfo(mContext, entity.getTitle(), "距离现在还有：" + timeTips, PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+		
+		((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE)).notify(10021, notification);
 	}
 	
 	/**

@@ -90,7 +90,7 @@ public class AlarmEntity implements Parcelable {
 	private int							state;														// 闹钟状态：正常、关闭、删除
 	private String						otherParam;												// 其他参数，key,value 的形式。
 	private int							timeSpan;													// 间隔，如：1天1次、3天1次。单位为：毫秒。
-	private int[]						weeks						= new int[1];					// 重复周期。设置周期设置为：周几重复才生效。
+	private int[]						weeks;														// 重复周期。设置周期设置为：周几重复才生效。
 																									
 	public AlarmEntity(String cycle, String title, String time) {
 		setCycle(cycle);
@@ -111,7 +111,7 @@ public class AlarmEntity implements Parcelable {
 		state = source.readInt();
 		timeSpan = source.readInt();
 		otherParam = source.readString();
-		source.readIntArray(weeks);
+		weeks = source.createIntArray();
 	}
 	
 	@Override
@@ -292,6 +292,7 @@ public class AlarmEntity implements Parcelable {
 	 */
 	public void putValue(String name, Object value) {
 		try {
+			if (value == null) { return; }
 			String json = getOtherParam();
 			JSONObject jsonObj;
 			if (TextUtils.isEmpty(json)) {
@@ -303,6 +304,7 @@ public class AlarmEntity implements Parcelable {
 			if (!TextUtils.isEmpty(jsonObj.optString(name, null))) { //存在的情况
 				jsonObj.remove(name); //先移除，后添加。
 			}
+			
 			jsonObj.put(name, value.toString());
 			setOtherParam(jsonObj.toString());
 		}
