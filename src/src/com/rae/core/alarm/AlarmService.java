@@ -24,22 +24,22 @@ public class AlarmService extends Service {
 		return null;
 	}
 	
-	@SuppressWarnings("deprecation")
+//	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		Log.i(TAG, "闹钟服务开启！");
 		AlarmProviderFactory.refreshAlarmList(getApplicationContext());
-		
-		// 通知。
-		Notification notification = new Notification();
-		notification.flags = Notification.FLAG_AUTO_CANCEL;
-		notification.tickerText = "闹钟提醒服务已开启！";
-		notification.when = System.currentTimeMillis();
-		notification.icon = getApplicationContext().getApplicationInfo().icon;
-		notification.setLatestEventInfo(getApplicationContext(), "闹钟提醒", "闹钟服务已经开启！", null);
-		
-		((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(10021, notification);
+//		
+//		// 通知。
+//		Notification notification = new Notification();
+//		notification.flags = Notification.FLAG_AUTO_CANCEL;
+//		notification.tickerText = "闹钟提醒服务已开启！";
+//		notification.when = System.currentTimeMillis();
+//		notification.icon = getApplicationContext().getApplicationInfo().icon;
+//		notification.setLatestEventInfo(getApplicationContext(), "闹钟提醒", "闹钟服务已经开启！", null);
+//		
+//		((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(10021, notification);
 		
 	}
 	

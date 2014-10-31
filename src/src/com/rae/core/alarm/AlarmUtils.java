@@ -5,7 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
+import android.renderscript.Program.TextureType;
+import android.text.TextUtils;
 
 @SuppressLint("SimpleDateFormat")
 public final class AlarmUtils {
@@ -74,9 +79,9 @@ public final class AlarmUtils {
 	}
 	
 	public static String dateToString(String format, String date) {
-		long time =  getTimeInMillis(date);
+		long time = getTimeInMillis(date);
 		calendar.clear();
-		calendar.setTimeInMillis(time);		
+		calendar.setTimeInMillis(time);
 		
 		return dateToString(format, calendar.getTime());
 	}
@@ -241,5 +246,33 @@ public final class AlarmUtils {
 			default:
 				return "Error!";
 		}
+	}
+	
+	public static AlarmEntity converEntity(String json) {
+		AlarmEntity entity = null;
+		try {
+			JSONObject obj = new JSONObject(json);
+			String cycle = obj.getString("cycle");
+			String title = obj.getString("title");
+			String time = obj.getString("time");
+			
+			entity = new AlarmEntity(cycle, title, time);
+			entity.setContent(obj.getString("content"));
+			entity.setOtherParam(obj.getString("otherParam"));
+			String weeks = obj.getString("weeks");
+			if (!TextUtils.isEmpty(weeks)) {
+				String[] items = weeks.split(weeks);
+				int[] values = new int[items.length];
+				for (int i = 0; i < values.length; i++) {
+					values[i] = Integer.valueOf(items[i]);
+				}
+				entity.setWeeks(values);
+			}
+		}
+		catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		return entity;
 	}
 }
