@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
-import android.renderscript.Program.TextureType;
 import android.text.TextUtils;
 
 @SuppressLint("SimpleDateFormat")
