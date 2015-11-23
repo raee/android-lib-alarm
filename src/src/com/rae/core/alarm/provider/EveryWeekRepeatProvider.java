@@ -16,18 +16,22 @@ import com.rae.core.alarm.AlarmUtils;
  * @author ChenRui
  * 
  */
-public class EveryWeekRepeatProvider extends AlarmProvider {
-	private int[] mWeeks; // 重复周期
-
-	public EveryWeekRepeatProvider(Context context, AlarmEntity entity) {
+public class EveryWeekRepeatProvider extends AlarmProvider
+{
+	private int[]	mWeeks; // 重复周期
+							
+	public EveryWeekRepeatProvider(Context context, AlarmEntity entity)
+	{
 		super(context, entity);
 		mWeeks = mAlarmEntity.getWeeks();
 		Arrays.sort(mWeeks); // 重新排序
 	}
-
+	
 	@Override
-	public AlarmEntity create() {
-		if (null == mWeeks || mWeeks.length <= 0) {
+	public AlarmEntity create()
+	{
+		if (null == mWeeks || mWeeks.length <= 0)
+		{
 			onAlarmError(new AlarmException("必须至少设置一个周重复。"));
 			return this.mAlarmEntity;
 		}
@@ -35,30 +39,35 @@ public class EveryWeekRepeatProvider extends AlarmProvider {
 		set(triggerAtMillis);
 		return this.mAlarmEntity;
 	}
-
+	
 	@Override
-	public void update() {
+	public void update()
+	{
 		create(); // 重新计算
 	}
-
+	
 	@Override
-	public void skip() {
+	public void skip()
+	{
 		cancle(); // 取消当前的
 		update(); // 更新下一次周期的。
 	}
-
+	
 	@Override
-	public long getNextAlarmTime(long currentTimeMillis) {
+	public long getNextAlarmTime(long currentTimeMillis)
+	{
 		Calendar calendar = Calendar.getInstance();
-		int week = AlarmUtils.getDayOfWeek(currentTimeMillis);
-
+		int week = AlarmUtils.getDayOfWeek(currentTimeMillis); // 当前是周几
+		
 		boolean hasFind = false;
 		long resultTimeMillis = currentTimeMillis;
-		int index = 0;
-
-		for (int i = 0; i < mWeeks.length; i++) {
+		int index = 0; // 周几
+		
+		for (int i = 0; i < mWeeks.length; i++)
+		{
 			int item = mWeeks[i];
-			if (item >= week) {
+			if (item >= week)
+			{
 				index = i; // 当前索引
 				calendar.setTimeInMillis(currentTimeMillis);
 				calendar.add(Calendar.DATE, item - week);
@@ -67,31 +76,39 @@ public class EveryWeekRepeatProvider extends AlarmProvider {
 				break; // 已经找到
 			}
 		}
-
-		if (resultTimeMillis <= System.currentTimeMillis()) { // 时间过期,加上下一个周期继续递归。
-			calendar.clear();
-			calendar.setTimeInMillis(resultTimeMillis);
-			index = index + 1; // 找下一周期
-			int span = 0;
-			if (index >= mWeeks.length) { // 循环一圈。
-				span = 7 - week + mWeeks[0];
-			} else {
-				span = mWeeks[index] - week;
-				span = span < 0 ? 0 : span;
-			}
-			calendar.add(Calendar.DATE, span); // 这周剩余天数+设定周期的第一天。
-
-			resultTimeMillis = calendar.getTimeInMillis();
-			Log.e(TAG, "时间过期，递归。" + AlarmUtils.getDateByTimeInMillis(resultTimeMillis));
-			return getNextAlarmTime(resultTimeMillis);
-		} else if (!hasFind) { // 没有找到，找下周。
+		
+		if (!hasFind)
+		{ // 没有找到，找下周。
 			calendar.clear();
 			calendar.setTimeInMillis(currentTimeMillis);
 			calendar.add(Calendar.DATE, 7 - week + mWeeks[0]); // 这周剩余天数+设定周期的第一天。
 			resultTimeMillis = calendar.getTimeInMillis();
 			Log.e(TAG, "本周没有，递归。" + AlarmUtils.getDateByTimeInMillis(resultTimeMillis));
 			return getNextAlarmTime(calendar.getTimeInMillis());
-		} else {
+		}
+		else if (resultTimeMillis <= System.currentTimeMillis())
+		{ // 时间过期,加上下一个周期继续递归。
+			calendar.clear();
+			calendar.setTimeInMillis(resultTimeMillis);
+			index = index + 1; // 找下一周期
+			int span = 0;
+			if (index >= mWeeks.length)
+			{ // 循环一圈。
+				span = 7 - week + mWeeks[0];
+			}
+			else
+			{
+				span = mWeeks[index] - week;
+				span = span < 0 ? 0 : span;
+			}
+			calendar.add(Calendar.DATE, span); // 这周剩余天数+设定周期的第一天。
+			
+			resultTimeMillis = calendar.getTimeInMillis();
+			Log.e(TAG, "时间过期，递归。" + AlarmUtils.getDateByTimeInMillis(resultTimeMillis));
+			return getNextAlarmTime(resultTimeMillis);
+		}
+		else
+		{
 			Log.i(TAG, "闹钟启动时间：" + AlarmUtils.getDateByTimeInMillis(resultTimeMillis));
 			return resultTimeMillis;
 		}

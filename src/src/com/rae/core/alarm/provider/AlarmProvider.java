@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.rae.core.alarm.AlarmCallbackListener;
 import com.rae.core.alarm.AlarmDataBase;
@@ -24,7 +25,8 @@ import com.rae.core.alarm.IDbAlarm;
  * @author ChenRui
  * 
  */
-public abstract class AlarmProvider {
+public abstract class AlarmProvider
+{
 	/**
 	 * 闹钟响铃广播
 	 */
@@ -45,14 +47,17 @@ public abstract class AlarmProvider {
 	protected Calendar				calendar			= Calendar.getInstance();
 	private AlarmCallbackListener	mListener;
 	
-	public AlarmProvider(Context context, AlarmEntity entity) {
+	public AlarmProvider(Context context, AlarmEntity entity)
+	{
 		mContext = context;
 		setAlarmEntity(entity);
 		mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 	}
 	
-	protected IDbAlarm getDatabase() {
-		if (mDb == null) {
+	protected IDbAlarm getDatabase()
+	{
+		if (mDb == null)
+		{
 			mDb = new AlarmDataBase(mContext);
 		}
 		return mDb;
@@ -63,7 +68,8 @@ public abstract class AlarmProvider {
 	 * 
 	 * @param listener
 	 */
-	public void setAlarmListener(AlarmCallbackListener listener) {
+	public void setAlarmListener(AlarmCallbackListener listener)
+	{
 		this.mListener = listener;
 	}
 	
@@ -75,13 +81,16 @@ public abstract class AlarmProvider {
 	/**
 	 * 在数据库中创建一个闹钟，如果存在则更新，不存在则创建。
 	 */
-	protected void createInDatabase() {
+	protected void createInDatabase()
+	{
 		// 插入到数据库中
-		if (mAlarmEntity.getId() == 0) {
+		if (mAlarmEntity.getId() == 0)
+		{
 			int id = getDatabase().addOrUpdate(mAlarmEntity);
 			mAlarmEntity.setId(id);
 		}
-		else {
+		else
+		{
 			getDatabase().update(mAlarmEntity);
 		}
 	}
@@ -108,12 +117,14 @@ public abstract class AlarmProvider {
 	/**
 	 * 取消（或关闭）当前闹钟。闹钟将不会再执行，也不会计算下次闹铃时间。
 	 */
-	public void cancle() {
+	public void cancle()
+	{
 		mAlarmManager.cancel(getOperation(mAlarmEntity.getId()));
 		Log.w(TAG, "---> 闹钟被取消  <-----\n" + mAlarmEntity.toString());
 	}
 	
-	public void delete() {
+	public void delete()
+	{
 		cancle();
 		getDatabase().delete(mAlarmEntity);
 	}
@@ -123,7 +134,8 @@ public abstract class AlarmProvider {
 	 * 
 	 * @param entity
 	 */
-	public void setAlarmEntity(AlarmEntity entity) {
+	public void setAlarmEntity(AlarmEntity entity)
+	{
 		mAlarmEntity = entity;
 	}
 	
@@ -132,7 +144,8 @@ public abstract class AlarmProvider {
 	 * 
 	 * @return
 	 */
-	public AlarmEntity getAlarmEntity() {
+	public AlarmEntity getAlarmEntity()
+	{
 		return mAlarmEntity;
 	}
 	
@@ -141,7 +154,8 @@ public abstract class AlarmProvider {
 	 * 
 	 * @return
 	 */
-	public String getName() {
+	public String getName()
+	{
 		return mName;
 	}
 	
@@ -151,8 +165,10 @@ public abstract class AlarmProvider {
 	 * @param date
 	 *            响铃时间
 	 */
-	protected boolean set(String date) {
-		if (TextUtils.isEmpty(date)) {
+	protected boolean set(String date)
+	{
+		if (TextUtils.isEmpty(date))
+		{
 			onAlarmError(new AlarmException("一次性闹钟开始时间不能为空！"));
 			return false;
 		}
@@ -167,9 +183,11 @@ public abstract class AlarmProvider {
 	 *            需要检查的时间
 	 * @return
 	 */
-	protected long checkOutOfTime(long triggerAtMillis) {
+	protected long checkOutOfTime(long triggerAtMillis)
+	{
 		
-		if (triggerAtMillis < System.currentTimeMillis()) {
+		if (triggerAtMillis < System.currentTimeMillis())
+		{
 			String errorTime = AlarmUtils.getDateByTimeInMillis(triggerAtMillis);
 			triggerAtMillis = getNextAlarmTime(triggerAtMillis); // 获取下次闹铃日期
 			String newTime = AlarmUtils.getDateByTimeInMillis(triggerAtMillis);
@@ -185,10 +203,12 @@ public abstract class AlarmProvider {
 	 * @param triggerAtMillis
 	 * @return
 	 */
-	protected boolean set(long triggerAtMillis) {
+	protected boolean set(long triggerAtMillis)
+	{
 		String date = AlarmUtils.getDateByTimeInMillis(triggerAtMillis);
 		triggerAtMillis = checkOutOfTime(triggerAtMillis); // 检查时间是否过期
-		if (triggerAtMillis <= 0 || triggerAtMillis < AlarmUtils.getTimeInMillis(mAlarmEntity.getTime())) {
+		if (triggerAtMillis <= 0 || triggerAtMillis < AlarmUtils.getTimeInMillis(mAlarmEntity.getTime()))
+		{
 			onAlarmError(new AlarmException("下次响铃时间不能为0或者小于上次时间！错误时间：" + date));
 			return false;
 		}
@@ -209,7 +229,8 @@ public abstract class AlarmProvider {
 	 * @param secound
 	 *            重复间隔，如：每天重复24*60*60*1000
 	 */
-	protected void setRepeat(long triggerAtMillis, long intervalMillis) {
+	protected void setRepeat(long triggerAtMillis, long intervalMillis)
+	{
 		createInDatabase();
 		mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, intervalMillis, getOperation(mAlarmEntity.getId()));
 		String date = AlarmUtils.getDateByTimeInMillis(triggerAtMillis); // 开始时间
@@ -224,7 +245,8 @@ public abstract class AlarmProvider {
 	 * 
 	 * @return
 	 */
-	public PendingIntent getOperation(int id) {
+	public PendingIntent getOperation(int id)
+	{
 		if (id == 0) { throw new AlarmException("闹钟唯一主键不能为0，请设置主键：entity.setId();"); }
 		Intent intent = new Intent(ACTION_ALARM_WAKEUP);
 		intent.putExtra(EXTRA_ALARM_ID, id); // 主键
@@ -238,7 +260,8 @@ public abstract class AlarmProvider {
 	 *            时间格式为：HH:mm
 	 * @return
 	 */
-	protected long converTime(long startTimeMillis, String time) {
+	protected long converTime(long startTimeMillis, String time)
+	{
 		int hour = Integer.valueOf(time.split(":")[0]);
 		int minute = Integer.valueOf(time.split(":")[1]);
 		
@@ -259,26 +282,34 @@ public abstract class AlarmProvider {
 	 * @param e
 	 *            异常信息
 	 */
-	protected void onAlarmError(AlarmException e) {
-		if (mListener != null) {
+	protected void onAlarmError(AlarmException e)
+	{
+		if (mListener != null)
+		{
 			mListener.onAlarmError(e);
 		}
 	}
 	
-	protected void onAlarmCancle() {
-		if (mListener != null) {
+	protected void onAlarmCancle()
+	{
+		if (mListener != null)
+		{
 			mListener.onAlarmCancle(this, mAlarmEntity);
 		}
 	}
 	
-	protected void onAlarmUpdate(String lastTime, String nextTime) {
-		if (mListener != null) {
+	protected void onAlarmUpdate(String lastTime, String nextTime)
+	{
+		if (mListener != null)
+		{
 			mListener.onAlarmUpdate(this, mAlarmEntity, lastTime, nextTime);
 		}
 	}
 	
-	protected void onAlarmDelete() {
-		if (mListener != null) {
+	protected void onAlarmDelete()
+	{
+		if (mListener != null)
+		{
 			mListener.onAlarmDelete(this, mAlarmEntity);
 		}
 	}
@@ -294,28 +325,39 @@ public abstract class AlarmProvider {
 	 *            是否重复
 	 */
 	@SuppressWarnings("deprecation")
-	protected void onAlarmSet(AlarmEntity entity, String date, boolean isRepeat) {
+	protected void onAlarmSet(AlarmEntity entity, String date, boolean isRepeat)
+	{
 		String timeTips = getNextAlarmTimeSpan();
 		Log.i(TAG, "---- 设置闹钟：" + entity.getTitle() + date + "----------");
-		if (mListener != null) {
+		if (mListener != null)
+		{
 			mListener.onAlarmCreated(this, mAlarmEntity, timeTips);
 		}
 		
 		// 通知。
-		Notification notification = new Notification();
-		notification.flags = Notification.FLAG_AUTO_CANCEL;
-		notification.tickerText = entity.getTitle() + "，响铃时间：" + timeTips;
-		notification.when = System.currentTimeMillis();
-		notification.icon = mContext.getApplicationInfo().icon;
-		notification.setLatestEventInfo(mContext, entity.getTitle(), "距离现在还有：" + timeTips, PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+		//		Intent intent = new Intent();
+		//		intent.setPackage(mContext.getPackageName());
+		//		intent.setClassName(mContext, "");
+		//	
 		
-		((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE)).notify(10021, notification);
+		//		Notification notification = new Notification();
+		//		notification.defaults = Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
+		//		notification.flags = Notification.FLAG_AUTO_CANCEL;
+		//		notification.tickerText = entity.getTitle() + "，响铃时间：" + timeTips;
+		//		notification.when = System.currentTimeMillis();
+		//		notification.icon = mContext.getApplicationInfo().icon;
+		//		notification.setLatestEventInfo(mContext, entity.getTitle(), "距离现在还有：" + timeTips, PendingIntent.getActivity(mContext, 0, null, 0));
+		//		
+		//		((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE)).notify(10021, notification);
+		
+		Toast.makeText(mContext, entity.getTitle() + "，距离现在还有：" + timeTips, Toast.LENGTH_LONG).show();
 	}
 	
 	/**
 	 * 获取下次响铃日期距离现在还有多久，单位：秒。
 	 */
-	public String getNextAlarmTimeSpan() {
+	public String getNextAlarmTimeSpan()
+	{
 		return AlarmUtils.getNextTimeSpanString(mAlarmEntity.getNextTime());
 	}
 }

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,7 +13,8 @@ import android.annotation.SuppressLint;
 import android.text.TextUtils;
 
 @SuppressLint("SimpleDateFormat")
-public final class AlarmUtils {
+public final class AlarmUtils
+{
 	public static Calendar	calendar			= Calendar.getInstance();
 	public static String	DEFAULT_DATE_FORMAT	= "yyyy-MM-dd HH:mm:ss";
 	
@@ -24,17 +26,21 @@ public final class AlarmUtils {
 	 * @return
 	 */
 	@SuppressLint("SimpleDateFormat")
-	public static long getTimeInMillis(String date) {
+	public static long getTimeInMillis(String date)
+	{
 		Date currentDate;
-		try {
+		try
+		{
 			String format = "HH:mm";
-			if (date.contains("-")) {
+			if (date.contains("-"))
+			{
 				format = "yyyy-MM-dd HH:mm:ss";
 			}
 			SimpleDateFormat dateForamt = new SimpleDateFormat(format);
 			currentDate = dateForamt.parse(date);
 		}
-		catch (ParseException e) {
+		catch (ParseException e)
+		{
 			e.printStackTrace();
 			
 			currentDate = new Date();
@@ -43,7 +49,8 @@ public final class AlarmUtils {
 		return calendar.getTimeInMillis();
 	}
 	
-	public static String getDateByTimeInMillis(long milliseconds) {
+	public static String getDateByTimeInMillis(long milliseconds)
+	{
 		calendar.setTimeInMillis(milliseconds);
 		return dateToString(calendar.getTime());
 	}
@@ -55,12 +62,15 @@ public final class AlarmUtils {
 	 *            日期，格式2014-12-12 16:00:00
 	 * @return
 	 */
-	public static Date parseDate(String date) {
-		try {
+	public static Date parseDate(String date)
+	{
+		try
+		{
 			SimpleDateFormat dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
 			return dateFormat.parse(date);
 		}
-		catch (ParseException e) {
+		catch (ParseException e)
+		{
 			e.printStackTrace();
 		}
 		return new Date();
@@ -73,11 +83,13 @@ public final class AlarmUtils {
 	 *            日期
 	 * @return
 	 */
-	public static String dateToString(Date date) {
+	public static String dateToString(Date date)
+	{
 		return dateToString(DEFAULT_DATE_FORMAT, date);
 	}
 	
-	public static String dateToString(String format, String date) {
+	public static String dateToString(String format, String date)
+	{
 		long time = getTimeInMillis(date);
 		calendar.clear();
 		calendar.setTimeInMillis(time);
@@ -93,7 +105,8 @@ public final class AlarmUtils {
 	 * @param date日期
 	 * @return
 	 */
-	public static String dateToString(String format, Date date) {
+	public static String dateToString(String format, Date date)
+	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
 		return dateFormat.format(date);
 	}
@@ -103,11 +116,13 @@ public final class AlarmUtils {
 	 * 
 	 * @return
 	 */
-	public static int getDayOfWeek(long time) {
+	public static int getDayOfWeek(long time)
+	{
 		calendar.clear();
 		calendar.setTimeInMillis(time);
 		int result = calendar.get(Calendar.DAY_OF_WEEK) - 1; // 这里是星期天为第一天的，则需减去1
-		if (result <= 0) {
+		if (result <= 0)
+		{
 			result = 7;
 		}
 		return result;
@@ -116,13 +131,15 @@ public final class AlarmUtils {
 	/**
 	 * 获取下次响铃日期距离现在还有多久，单位：秒。
 	 */
-	public static long getNextAlarmTimeSpan(String time) {
+	public static long getNextAlarmTimeSpan(String time)
+	{
 		calendar.clear();
 		calendar.setTime(parseDate(time));
 		return (calendar.getTimeInMillis() - System.currentTimeMillis()) / 1000; // 得到时间差,秒
 	}
 	
-	public static String getNextTimeSpanString(String time) {
+	public static String getNextTimeSpanString(String time)
+	{
 		long timespan = getNextAlarmTimeSpan(time);
 		String result = "";
 		
@@ -145,41 +162,53 @@ public final class AlarmUtils {
 		df.secound = s;
 		df.span = timespan;
 		
-		if (df.span < 0) {
+		if (df.span < 0)
+		{
 			result = "时间已过";
 		}
-		else if (df.minute < 1) {
+		else if (df.minute < 1)
+		{
 			result = df.secound + "秒";
 		}
-		else if (df.hour < 1) {
+		else if (df.hour < 1)
+		{
 			result = df.minute + "分" + df.secound + "秒";
 		}
-		else if (df.day < 1) {
+		else if (df.day < 1)
+		{
 			result = df.hour + "时";
-			if (df.minute > 0) {
+			if (df.minute > 0)
+			{
 				result += df.minute + "分";
 			}
 			result += df.secound + "秒";
 		}
-		else if (df.day == 1) {
+		else if (df.day == 1)
+		{
 			result = "明天";
 		}
-		else if (df.day == 2) {
+		else if (df.day == 2)
+		{
 			result = "后天";
 		}
-		else if (df.day == 3) {
+		else if (df.day == 3)
+		{
 			result = "大后天";
 		}
-		else if (df.month < 1) {
+		else if (df.month < 1)
+		{
 			result = df.day + "天";
 		}
-		else if (df.month == 6) {
+		else if (df.month == 6)
+		{
 			result = "半年";
 		}
-		else if (df.year > 0) {
+		else if (df.year > 0)
+		{
 			result = df.year + "年";
 		}
-		else {
+		else
+		{
 			result = df.month + "月";
 		}
 		
@@ -187,7 +216,8 @@ public final class AlarmUtils {
 		
 	}
 	
-	static class DateForamt {
+	static class DateForamt
+	{
 		/**
 		 * 年
 		 */
@@ -224,8 +254,10 @@ public final class AlarmUtils {
 		public long	span;
 	}
 	
-	public static String getWeekString(int week) {
-		switch (week) {
+	public static String getWeekString(int week)
+	{
+		switch (week)
+		{
 			case 0:
 				return "日";
 			case 1:
@@ -247,9 +279,11 @@ public final class AlarmUtils {
 		}
 	}
 	
-	public static AlarmEntity converEntity(String json) {
+	public static AlarmEntity converEntity(String json)
+	{
 		AlarmEntity entity = null;
-		try {
+		try
+		{
 			JSONObject obj = new JSONObject(json);
 			String cycle = obj.getString("cycle");
 			String title = obj.getString("title");
@@ -259,16 +293,20 @@ public final class AlarmUtils {
 			entity.setContent(obj.getString("content"));
 			entity.setOtherParam(obj.getString("otherParam"));
 			String weeks = obj.getString("weeks");
-			if (!TextUtils.isEmpty(weeks)) {
-				String[] items = weeks.split(weeks);
-				int[] values = new int[items.length];
-				for (int i = 0; i < values.length; i++) {
-					values[i] = Integer.valueOf(items[i]);
+			if (!TextUtils.isEmpty(weeks))
+			{
+				JSONArray arr = new JSONArray(weeks);
+				//				String[] items = weeks.split(weeks);
+				int[] values = new int[arr.length()];
+				for (int i = 0; i < arr.length(); i++)
+				{
+					values[i] = Integer.valueOf(arr.getInt(i));
 				}
 				entity.setWeeks(values);
 			}
 		}
-		catch (JSONException e) {
+		catch (JSONException e)
+		{
 			e.printStackTrace();
 		}
 		
